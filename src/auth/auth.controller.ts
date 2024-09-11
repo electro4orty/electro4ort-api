@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Post,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '@/zod-validation/zod-validation.pipe';
 import { RegisterDTO, registerSchema } from './dto/register.dto';
@@ -20,9 +21,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body(new ZodValidationPipe(registerSchema)) data: RegisterDTO,
-  ) {
+  @UsePipes(new ZodValidationPipe(registerSchema))
+  async register(@Body() data: RegisterDTO) {
     const newUser = await this.authService.register(data);
     if (!newUser) {
       throw new BadRequestException();

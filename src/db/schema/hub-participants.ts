@@ -5,7 +5,7 @@ import { users } from './users';
 export const hubParticipants = pgTable('hub_participants', {
   id: serial('id').primaryKey(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('created_at'),
+  updatedAt: timestamp('updated_at'),
   hubId: integer('hub_id')
     .references(() => hubs.id, {
       onDelete: 'cascade',
