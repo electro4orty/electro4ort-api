@@ -1,17 +1,19 @@
-import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { hubs } from './hubs';
 
 export const messages = pgTable('messages', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at'),
-  authorId: integer('author_id').references(() => users.id, {
-    onDelete: 'cascade',
+  authorId: uuid('author_id').references(() => users.id, {
+    onDelete: 'set null',
   }),
-  hubId: integer('hub_id').references(() => hubs.id, {
-    onDelete: 'cascade',
-  }),
+  hubId: uuid('hub_id')
+    .references(() => hubs.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
   body: text('body').notNull(),
 });
 
