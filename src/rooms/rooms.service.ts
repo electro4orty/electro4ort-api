@@ -12,14 +12,14 @@ export class RoomsService {
     const [newRoom] = await this.drizzleService.db
       .insert(rooms)
       .values({
-        title: data.title,
+        name: data.name,
         hubId: data.hubId,
       })
       .returning();
     return newRoom;
   }
 
-  async findById(roomId: number) {
+  async findById(roomId: string) {
     const foundRooms = await this.drizzleService.db
       .select()
       .from(rooms)
@@ -32,7 +32,7 @@ export class RoomsService {
     return foundRooms[0];
   }
 
-  async findByHubId(hubId: number) {
+  async findByHubId(hubId: string) {
     const foundRooms = await this.drizzleService.db
       .select()
       .from(rooms)
