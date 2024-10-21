@@ -4,8 +4,8 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -23,10 +23,7 @@ export class HubsController {
 
   @Post(':hubId/join')
   @UseGuards(AuthGuard)
-  async joinHub(
-    @Param('hubId', ParseIntPipe) hubId: number,
-    @UserId() userId: number,
-  ) {
+  async joinHub(@Param('hubId') hubId: string, @UserId() userId: string) {
     const participant = await this.hubsService.joinHub(hubId, userId);
     return participant;
   }
@@ -34,7 +31,7 @@ export class HubsController {
   @Post()
   @UseGuards(AuthGuard)
   async create(
-    @UserId() userId: number,
+    @UserId() userId: string,
     @Body(new ZodValidationPipe(createHubSchema)) data: CreateHubDTO,
   ) {
     const newHub = await this.hubsService.create(data, userId);
@@ -47,15 +44,24 @@ export class HubsController {
     return hubs;
   }
 
+  @Get(':hubSlug')
+  async getOne(@Param('hubSlug') hubSlug: string) {
+    const hub = await this.hubsService.getOne(hubSlug);
+    if (!hub) {
+      throw new NotFoundException();
+    }
+    return hub;
+  }
+
   @Get('joined')
   @UseGuards(AuthGuard)
-  async getJoined(@UserId() userId: number) {
+  async getJoined(@UserId() userId: string) {
     const hubs = await this.hubsService.getJoinedHubs(userId);
     return hubs;
   }
 
   @Get(':hubId/rooms')
-  async getRooms(@Param('hubId', ParseIntPipe) hubId: number) {
+  async getRooms(@Param('hubId') hubId: string) {
     const hubRooms = await this.roomsService.findByHubId(hubId);
     return hubRooms;
   }

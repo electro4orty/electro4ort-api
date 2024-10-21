@@ -8,7 +8,7 @@ import { hubParticipants, hubs } from '@/db/schema';
 export class HubsService {
   constructor(private readonly drizzleService: DrizzleService) {}
 
-  async joinHub(hubId: number, userId: number) {
+  async joinHub(hubId: string, userId: string) {
     const hasAlreadyJoined = await this.checkHasJoined(hubId, userId);
     if (hasAlreadyJoined) {
       throw new BadRequestException('This user already joined this hub');
@@ -24,12 +24,13 @@ export class HubsService {
     return participant;
   }
 
-  async create(data: CreateHubDTO, authorId: number) {
+  async create(data: CreateHubDTO, authorId: string) {
     const [newHub] = await this.drizzleService.db
       .insert(hubs)
       .values({
-        title: data.title,
+        name: data.name,
         authorId,
+        slug: data.name.toLowerCase().replace(/ /g, '-'),
       })
       .returning();
     return newHub;
@@ -39,7 +40,20 @@ export class HubsService {
     return await this.drizzleService.db.select().from(hubs).limit(12);
   }
 
-  async checkHasJoined(hubId: number, userId: number) {
+  async getOne(hubSlug: string) {
+    const [targetHub] = await this.drizzleService.db
+      .select()
+      .from(hubs)
+      .where(eq(hubs.slug, hubSlug))
+      .limit(1);
+    if (!targetHub) {
+      return null;
+    }
+
+    return targetHub;
+  }
+
+  async checkHasJoined(hubId: string, userId: string) {
     const participants = await this.drizzleService.db
       .select()
       .from(hubParticipants)
@@ -54,7 +68,7 @@ export class HubsService {
     return participants.length !== 0;
   }
 
-  async getJoinedHubs(userId: number) {
+  async getJoinedHubs(userId: string) {
     const participants = await this.drizzleService.db
       .select()
       .from(hubParticipants)
