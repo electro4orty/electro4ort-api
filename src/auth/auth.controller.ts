@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -23,30 +22,21 @@ export class AuthController {
   @Post('register')
   @UsePipes(new ZodValidationPipe(registerSchema))
   async register(@Body() data: RegisterDTO) {
-    const newUser = await this.authService.register(data);
-    if (!newUser) {
-      throw new BadRequestException();
-    }
-
-    return newUser;
+    const authData = await this.authService.register(data);
+    return authData;
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body(new ZodValidationPipe(loginSchema)) data: LoginDTO) {
-    const user = await this.authService.login(data);
-    if (!user) {
-      throw new BadRequestException();
-    }
-
-    return {
-      user: user,
-    };
+    const authData = await this.authService.login(data);
+    return authData;
   }
 
   @Get('me')
   @UseGuards(AuthGuard)
-  async getMe(@UserId() userId: number) {
-    return userId;
+  async getMe(@UserId() userId: string) {
+    const authData = await this.authService.getMe(userId);
+    return authData;
   }
 }

@@ -15,7 +15,7 @@ export class UsersService {
     return user;
   }
 
-  async findById(userId: number) {
+  async findById(userId: string) {
     return await this.drizzleService.db.query.users.findFirst({
       where: eq(users.id, userId),
     });

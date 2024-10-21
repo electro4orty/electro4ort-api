@@ -1,22 +1,16 @@
-import {
-  integer,
-  pgTable,
-  serial,
-  timestamp,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { hubs } from './hubs';
 
 export const rooms = pgTable('rooms', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at'),
-  hubId: integer('hub_id')
+  hubId: uuid('hub_id')
     .references(() => hubs.id, {
       onDelete: 'cascade',
     })
     .notNull(),
-  title: varchar('title').notNull(),
+  name: varchar('name').notNull(),
 });
 
 export type Room = typeof rooms.$inferSelect;

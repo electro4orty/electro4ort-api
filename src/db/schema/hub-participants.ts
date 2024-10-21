@@ -1,19 +1,21 @@
-import { integer, pgTable, serial, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { hubs } from './hubs';
 import { users } from './users';
 
 export const hubParticipants = pgTable('hub_participants', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at'),
-  hubId: integer('hub_id')
+  hubId: uuid('hub_id')
     .references(() => hubs.id, {
       onDelete: 'cascade',
     })
     .notNull(),
-  userId: integer('user_id').references(() => users.id, {
-    onDelete: 'cascade',
-  }),
+  userId: uuid('user_id')
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    })
+    .notNull(),
 });
 
 export type HubParticipant = typeof hubParticipants.$inferSelect;
