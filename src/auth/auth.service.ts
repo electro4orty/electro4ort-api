@@ -7,6 +7,7 @@ import { RegisterDTO } from './dto/register.dto';
 import { UsersService } from '@/users/users.service';
 import { LoginDTO } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { env } from '@/utils/env';
 
 @Injectable()
 export class AuthService {
@@ -22,9 +23,14 @@ export class AuthService {
     }
 
     const user = await this.usersService.create(data);
-    const token = await this.jwtService.signAsync({
-      userId: user.id,
-    });
+    const token = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+      },
+      {
+        secret: env.JWT_SECRET,
+      },
+    );
 
     return {
       user,
@@ -38,9 +44,14 @@ export class AuthService {
       throw new BadRequestException('Wrong credentials');
     }
 
-    const token = await this.jwtService.signAsync({
-      userId: user.id,
-    });
+    const token = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+      },
+      {
+        secret: env.JWT_SECRET,
+      },
+    );
 
     return {
       user,

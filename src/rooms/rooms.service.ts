@@ -1,19 +1,29 @@
 import { DrizzleService } from '@/db/drizzle.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateRoomDTO } from './dto/create-room.dto';
 import { rooms } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { HubsService } from '@/hubs/hubs.service';
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly drizzleService: DrizzleService) {}
+  constructor(
+    private readonly drizzleService: DrizzleService,
+    private readonly hubsService: HubsService,
+  ) {}
 
   async create(data: CreateRoomDTO) {
+    const hub = await this.hubsService.getOne(data.hubSlug);
+    if (!hub) {
+      throw new BadRequestException();
+    }
+
     const [newRoom] = await this.drizzleService.db
       .insert(rooms)
       .values({
         name: data.name,
-        hubId: data.hubId,
+        hubId: hub.id,
+        type: data.type,
       })
       .returning();
     return newRoom;

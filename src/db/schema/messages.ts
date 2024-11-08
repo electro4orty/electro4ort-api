@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
-import { hubs } from './hubs';
+import { rooms } from './rooms';
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -9,8 +9,8 @@ export const messages = pgTable('messages', {
   authorId: uuid('author_id').references(() => users.id, {
     onDelete: 'set null',
   }),
-  hubId: uuid('hub_id')
-    .references(() => hubs.id, {
+  roomId: uuid('room_id')
+    .references(() => rooms.id, {
       onDelete: 'cascade',
     })
     .notNull(),

@@ -108,6 +108,7 @@ describe('HubsController', () => {
           updatedAt: null,
           hubId: 'test-hub-id',
           name: 'Test room 1',
+          type: 'text',
         },
       ];
       jest

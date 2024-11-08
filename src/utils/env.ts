@@ -4,6 +4,7 @@ import 'dotenv/config';
 const envSchema = z.object({
   DB_URL: z.string(),
   JWT_SECRET: z.string(),
+  APP_URL: z.string().url(),
 });
 
 export type Env = z.infer<typeof envSchema>;
