@@ -6,13 +6,18 @@ import {
   Param,
   Post,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { ZodValidationPipe } from '@/zod-validation/zod-validation.pipe';
 import { CreateRoomDTO, createRoomSchema } from './dto/create-room.dto';
 import { AuthGuard } from '@/auth/auth.guard';
 import { MessagesService } from '@/messages/messages.service';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { env } from '@/utils/env';
 
 @Controller('rooms')
 export class RoomsController {
@@ -58,5 +63,21 @@ export class RoomsController {
         : undefined,
     );
     return messages;
+  }
+
+  @Post(':roomId/files')
+  @UseInterceptors(
+    FilesInterceptor('files', 99, {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const fileName = `${Date.now()}_${file.originalname}`;
+          cb(null, fileName);
+        },
+      }),
+    }),
+  )
+  uploadFile(@UploadedFiles() files: Express.Multer.File[]) {
+    return files.map((file) => `${env.APP_URL}/uploads/${file.filename}`);
   }
 }
