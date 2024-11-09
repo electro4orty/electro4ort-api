@@ -41,15 +41,13 @@ export class MessagesService {
             .select()
             .from(messages)
             .where(
-              cursor
-                ? or(
-                    lt(messages.createdAt, data[data.length - 1].createdAt),
-                    and(
-                      eq(messages.createdAt, data[data.length - 1].createdAt),
-                      lt(messages.id, data[data.length - 1].id),
-                    ),
-                  )
-                : undefined,
+              or(
+                lt(messages.createdAt, data[data.length - 1].createdAt),
+                and(
+                  eq(messages.createdAt, data[data.length - 1].createdAt),
+                  lt(messages.id, data[data.length - 1].id),
+                ),
+              ),
             )
             .limit(1)
         : null;
