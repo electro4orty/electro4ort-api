@@ -56,10 +56,13 @@ export class MessagesService {
 
     return {
       data,
-      nextCursor: {
-        id: data[data.length - 1].id,
-        createdAt: data[data.length - 1].createdAt,
-      },
+      nextCursor:
+        next && next.length !== 0
+          ? {
+              id: data[data.length - 1].id,
+              createdAt: data[data.length - 1].createdAt,
+            }
+          : null,
       hasNextPage: next && next.length !== 0,
     };
   }
