@@ -1,7 +1,13 @@
-import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  doublePrecision,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { messages } from './messages';
 
-export const attachments = pgTable('messages', {
+export const attachments = pgTable('attachments', {
   id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at'),
@@ -11,8 +17,9 @@ export const attachments = pgTable('messages', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
-  path: varchar('path').notNull().unique(),
+  fileName: varchar('file_name').notNull().unique(),
   mimeType: varchar('mime_type').notNull(),
+  size: doublePrecision('size').notNull(),
 });
 
 export type Attachment = typeof attachments.$inferSelect;

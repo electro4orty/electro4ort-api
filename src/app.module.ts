@@ -6,6 +6,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { MessagesModule } from './messages/messages.module';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from './utils/env';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { env } from './utils/env';
         expiresIn: '7d',
       },
     }),
+    AttachmentsModule,
   ],
   providers: [],
 })

@@ -17,7 +17,6 @@ import { AuthGuard } from '@/auth/auth.guard';
 import { MessagesService } from '@/messages/messages.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { env } from '@/utils/env';
 
 @Controller('rooms')
 export class RoomsController {
@@ -78,6 +77,10 @@ export class RoomsController {
     }),
   )
   uploadFile(@UploadedFiles() files: Express.Multer.File[]) {
-    return files.map((file) => `${env.APP_URL}/uploads/${file.filename}`);
+    return files.map((file) => ({
+      fileName: file.filename,
+      mimeType: file.mimetype,
+      size: file.size,
+    }));
   }
 }
