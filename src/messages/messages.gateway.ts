@@ -36,19 +36,23 @@ export class MessagesGateway {
     data: CreateMessageDTO,
     @ConnectedSocket() client: Socket,
   ) {
-    const newMessage = await this.messagesService.create(data);
-    const room = await this.roomsService.findById(newMessage.roomId);
-    if (!room) {
-      throw new WsException('Room not found');
+    try {
+      const newMessage = await this.messagesService.create(data);
+      const room = await this.roomsService.findById(newMessage.roomId);
+      if (!room) {
+        throw new WsException('Room not found');
+      }
+
+      const hub = await this.hubsService.findById(room.hubId);
+      if (!hub) {
+        throw new WsException('Hub not found');
+      }
+
+      client.broadcast.to(hub.slug).emit('message', newMessage);
+
+      return newMessage;
+    } catch (error) {
+      throw new WsException((error as Error).message);
     }
-
-    const hub = await this.hubsService.findById(room.hubId);
-    if (!hub) {
-      throw new WsException('Hub not found');
-    }
-
-    client.broadcast.to(hub.slug).emit('message', newMessage);
-
-    return newMessage;
   }
 }
