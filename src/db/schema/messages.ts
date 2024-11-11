@@ -3,7 +3,7 @@ import { users } from './users';
 import { rooms } from './rooms';
 
 export const messages = pgTable('messages', {
-  id: uuid('id').unique().primaryKey().defaultRandom(),
+  id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at'),
   authorId: uuid('author_id').references(() => users.id, {
