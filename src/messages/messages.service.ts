@@ -1,9 +1,9 @@
 import { DrizzleService } from '@/db/drizzle.service';
-import { messages, users } from '@/db/schema';
+import { Message, messages, User, users } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, lt, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, lt, or } from 'drizzle-orm';
 import { CreateMessageDTO } from './dto/create-message.dto';
-import { attachments } from '@/db/schema/attachments';
+import { Attachment, attachments } from '@/db/schema/attachments';
 
 @Injectable()
 export class MessagesService {
@@ -25,20 +25,34 @@ export class MessagesService {
           )
         : undefined,
     );
-    const data = (
-      await this.drizzleService.db
-        .select()
-        .from(messages)
-        .where(where)
-        .limit(20)
-        .orderBy(desc(messages.createdAt), desc(messages.id))
-        .leftJoin(users, eq(messages.authorId, users.id))
-        .leftJoin(attachments, eq(messages.id, attachments.messageId))
-    ).map(({ messages, users, attachments }) => ({
-      ...messages,
-      author: users,
-      attachments: [attachments],
-    }));
+
+    const rows = await this.drizzleService.db
+      .select({
+        ...getTableColumns(messages),
+        author: users,
+        attachment: attachments,
+      })
+      .from(messages)
+      .limit(20)
+      .where(where)
+      .orderBy(desc(messages.createdAt), desc(messages.id))
+      .leftJoin(users, eq(messages.authorId, users.id))
+      .leftJoin(attachments, eq(attachments.messageId, messages.id));
+
+    const data = rows.reduce<
+      (Message & { author: User | null; attachments: Attachment[] })[]
+    >((prev, message) => {
+      const existingMessage = prev.find((item) => item.id === message.id);
+      if (!existingMessage) {
+        prev.push({
+          ...message,
+          attachments: message.attachment ? [message.attachment] : [],
+        });
+      } else if (message.attachment) {
+        existingMessage.attachments.push(message.attachment);
+      }
+      return prev;
+    }, []);
 
     const next =
       data.length !== 0

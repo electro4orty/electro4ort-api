@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   NotFoundException,
   Param,
@@ -17,16 +18,18 @@ import { AuthGuard } from '@/auth/auth.guard';
 import { MessagesService } from '@/messages/messages.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { UserId } from '@/auth/user-id.decorator';
 
 @Controller('rooms')
+@UseGuards(AuthGuard)
 export class RoomsController {
   constructor(
     private readonly roomsService: RoomsService,
+    private readonly hubsService: RoomsService,
     private readonly messagesService: MessagesService,
   ) {}
 
   @Post()
-  @UseGuards(AuthGuard)
   async create(
     @Body(new ZodValidationPipe(createRoomSchema)) data: CreateRoomDTO,
   ) {
@@ -35,10 +38,15 @@ export class RoomsController {
   }
 
   @Get(':roomId')
-  async findById(@Param('roomId') roomId: string) {
+  async findById(@Param('roomId') roomId: string, @UserId() userId: string) {
     const room = await this.roomsService.findById(roomId);
     if (!room) {
       throw new NotFoundException();
+    }
+
+    const hasJoined = await this.hubsService.checkHasJoined(room.hubId, userId);
+    if (!hasJoined) {
+      throw new ForbiddenException();
     }
 
     return room;

@@ -1,5 +1,5 @@
 import { DrizzleService } from '@/db/drizzle.service';
-import { NewUser, users } from '@/db/schema';
+import { NewUser, users, UserStatus } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
@@ -26,5 +26,17 @@ export class UsersService {
       where: eq(users.username, username),
     });
     return user;
+  }
+
+  async updateStatus(userId: string, status: UserStatus) {
+    const [updatedUser] = await this.drizzleService.db
+      .update(users)
+      .set({
+        status,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
   }
 }
