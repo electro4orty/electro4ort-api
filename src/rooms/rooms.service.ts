@@ -49,4 +49,9 @@ export class RoomsService {
       .where(eq(rooms.hubId, hubId));
     return foundRooms;
   }
+
+  async checkHasJoined(hubId: string, userId: string) {
+    const hasJoined = await this.hubsService.checkHasJoined(hubId, userId);
+    return hasJoined;
+  }
 }

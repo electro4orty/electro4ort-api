@@ -1,4 +1,8 @@
-import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
+export const userStatus = pgEnum('user_status', ['online', 'offline']);
+
+export type UserStatus = (typeof userStatus.enumValues)[number];
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -8,6 +12,7 @@ export const users = pgTable('users', {
   password: varchar('password').notNull(),
   displayName: varchar('display_name').notNull(),
   avatar: varchar('avatar'),
+  status: userStatus('status').notNull().default('offline'),
 });
 
 export type User = typeof users.$inferSelect;
