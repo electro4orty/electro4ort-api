@@ -2,6 +2,7 @@ import { DrizzleService } from '@/db/drizzle.service';
 import { NewUser, users, UserStatus } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
+import { UpdateUserDTO } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +34,20 @@ export class UsersService {
       .update(users)
       .set({
         status,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
+  }
+
+  async update(userId: string, data: UpdateUserDTO) {
+    const [updatedUser] = await this.drizzleService.db
+      .update(users)
+      .set({
+        displayName: data.displayName,
+        username: data.username,
+        avatar: data.avatar || null,
       })
       .where(eq(users.id, userId))
       .returning();
