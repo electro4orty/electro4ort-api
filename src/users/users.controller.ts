@@ -4,11 +4,16 @@ import {
   Get,
   NotFoundException,
   Param,
+  Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ZodValidationPipe } from '@/zod-validation/zod-validation.pipe';
 import { UpdateUserDTO, updateUserSchema } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +27,26 @@ export class UsersController {
     }
 
     return user;
+  }
+
+  @Post('avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const fileName = `${Date.now()}_${file.originalname}`;
+          cb(null, fileName);
+        },
+      }),
+    }),
+  )
+  async uploadAvatar(@UploadedFile() file: Express.Multer.File) {
+    return {
+      fileName: file.filename,
+      mimeType: file.mimetype,
+      size: file.size,
+    };
   }
 
   @Put(':userId')
