@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createMessageSchema = z.object({
   roomId: z.string(),
   userId: z.string(),
-  body: z.string().max(255),
+  body: z.string().max(10000),
   attachments: z
     .array(
       z.object({
