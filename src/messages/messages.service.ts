@@ -91,6 +91,7 @@ export class MessagesService {
         body: data.body,
         roomId: data.roomId,
         authorId: data.userId,
+        type: data.type,
       })
       .returning();
     const [author] = await this.drizzleService.db

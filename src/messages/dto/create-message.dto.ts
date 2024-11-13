@@ -1,3 +1,4 @@
+import { messageType } from '@/db/schema';
 import { z } from 'zod';
 
 export const createMessageSchema = z.object({
@@ -14,6 +15,7 @@ export const createMessageSchema = z.object({
     )
     .max(99)
     .nullable(),
+  type: z.enum(messageType.enumValues),
 });
 
 export type CreateMessageDTO = z.infer<typeof createMessageSchema>;
