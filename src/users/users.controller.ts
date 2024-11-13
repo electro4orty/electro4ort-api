@@ -32,6 +32,10 @@ export class UsersController {
   @Post('avatar')
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: {
+        fieldSize: 1e6 * 5,
+        fileSize: 1e6 * 5,
+      },
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
