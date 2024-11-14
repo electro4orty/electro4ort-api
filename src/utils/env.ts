@@ -5,6 +5,9 @@ const envSchema = z.object({
   DB_URL: z.string(),
   JWT_SECRET: z.string(),
   APP_URL: z.string().url(),
+  WEB_PUSH_PUBLIC_KEY: z.string(),
+  WEB_PUSH_PRIVATE_KEY: z.string(),
+  ADMIN_EMAIL: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

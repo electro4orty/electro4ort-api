@@ -54,4 +54,16 @@ export class UsersService {
 
     return updatedUser;
   }
+
+  async savePushSubscription(userId: string, subscription: object) {
+    const [updatedUser] = await this.drizzleService.db
+      .update(users)
+      .set({
+        pushSubscription: subscription,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedUser;
+  }
 }
