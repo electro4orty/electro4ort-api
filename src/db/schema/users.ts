@@ -1,4 +1,11 @@
-import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  jsonb,
+  pgEnum,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 export const userStatus = pgEnum('user_status', ['online', 'offline']);
 
@@ -14,6 +21,7 @@ export const users = pgTable('users', {
   avatar: varchar('avatar'),
   status: userStatus('status').notNull().default('offline'),
   birthDate: timestamp('birth_date'),
+  pushSubscription: jsonb('push_subscription'),
 });
 
 export type User = typeof users.$inferSelect;
