@@ -7,6 +7,7 @@ import { MessagesModule } from './messages/messages.module';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from './utils/env';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { PushNotificationsService } from './push-notifications/push-notifications.service';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { AttachmentsModule } from './attachments/attachments.module';
     }),
     AttachmentsModule,
   ],
-  providers: [],
+  providers: [PushNotificationsService],
 })
 export class AppModule {}

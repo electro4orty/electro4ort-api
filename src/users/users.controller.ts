@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -14,8 +15,10 @@ import { ZodValidationPipe } from '@/zod-validation/zod-validation.pipe';
 import { UpdateUserDTO, updateUserSchema } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { AuthGuard } from '@/auth/auth.guard';
 
 @Controller('users')
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -64,6 +67,21 @@ export class UsersController {
     }
 
     const updatedUser = await this.usersService.update(user.id, body);
+
+    return updatedUser;
+  }
+
+  @Post(':userId/push-config')
+  async pushConfig(@Param('userId') userId: string, @Body() data: object) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    const updatedUser = await this.usersService.savePushSubscription(
+      userId,
+      data,
+    );
 
     return updatedUser;
   }
