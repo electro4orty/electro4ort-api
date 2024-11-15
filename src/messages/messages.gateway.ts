@@ -66,13 +66,16 @@ export class MessagesGateway {
       );
 
       filteredParticipants.forEach((user) => {
-        this.pushNotificationsService.send(
-          user.pushSubscription as PushSubscription,
-          {
-            message: newMessage.body,
-            title: 'New message',
-          },
-        );
+        if (user.pushSubscription) {
+          this.pushNotificationsService.send(
+            user.pushSubscription as PushSubscription,
+            {
+              message: newMessage.body,
+              title: 'New message',
+              roomId: newMessage.roomId,
+            },
+          );
+        }
       });
 
       return newMessage;
