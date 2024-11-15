@@ -5,7 +5,6 @@ import {
   WebSocketGateway,
   WsException,
 } from '@nestjs/websockets';
-import { PushSubscription } from 'web-push';
 import {
   CreateMessageDTO,
   createMessageSchema,
@@ -17,8 +16,6 @@ import { AuthGuard } from '@/auth/auth.guard';
 import { Socket } from 'socket.io';
 import { RoomsService } from '@/rooms/rooms.service';
 import { HubsService } from '@/hubs/hubs.service';
-import { PushNotificationsService } from '@/push-notifications/push-notifications.service';
-import { UsersService } from '@/users/users.service';
 
 @WebSocketGateway({
   cors: {
@@ -30,8 +27,6 @@ export class MessagesGateway {
     private readonly messagesService: MessagesService,
     private readonly roomsService: RoomsService,
     private readonly hubsService: HubsService,
-    private readonly usersService: UsersService,
-    private readonly pushNotificationsService: PushNotificationsService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -42,12 +37,8 @@ export class MessagesGateway {
     @ConnectedSocket() client: Socket,
   ) {
     try {
-      const user = await this.usersService.findById(data.userId);
-      if (!user) {
-        throw new WsException('User not found');
-      }
-
-      const room = await this.roomsService.findById(data.roomId);
+      const newMessage = await this.messagesService.create(data);
+      const room = await this.roomsService.findById(newMessage.roomId);
       if (!room) {
         throw new WsException('Room not found');
       }
@@ -57,23 +48,7 @@ export class MessagesGateway {
         throw new WsException('Hub not found');
       }
 
-      const newMessage = await this.messagesService.create(data);
-
       client.broadcast.to(hub.slug).emit('message', newMessage);
-      const participants = await this.hubsService.getParticipants(hub.id);
-      const filteredParticipants = participants.filter(
-        (user) => user.id !== data.userId,
-      );
-
-      filteredParticipants.forEach((user) => {
-        this.pushNotificationsService.send(
-          user.pushSubscription as PushSubscription,
-          {
-            message: newMessage.body,
-            title: 'New message',
-          },
-        );
-      });
 
       return newMessage;
     } catch (error) {
