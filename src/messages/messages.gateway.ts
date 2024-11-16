@@ -65,9 +65,9 @@ export class MessagesGateway {
         (user) => user.id !== data.userId,
       );
 
-      filteredParticipants.forEach((user) => {
+      const promises = filteredParticipants.map((user) => {
         if (user.pushSubscription && user.status === 'offline') {
-          this.pushNotificationsService.send(
+          return this.pushNotificationsService.send(
             user.pushSubscription as PushSubscription,
             {
               body: newMessage.body,
@@ -77,6 +77,8 @@ export class MessagesGateway {
           );
         }
       });
+
+      await Promise.all(promises.filter((promise) => !!promise));
 
       return newMessage;
     } catch (error) {
