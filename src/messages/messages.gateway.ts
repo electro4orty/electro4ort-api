@@ -78,10 +78,17 @@ export class MessagesGateway {
         }
       });
 
-      await Promise.all(promises.filter((promise) => !!promise));
+      try {
+        await Promise.all(promises.filter((promise) => !!promise));
+      } catch (error) {
+        console.log('<Push error>');
+        console.log(error);
+        console.log('</Push error>');
+      }
 
       return newMessage;
     } catch (error) {
+      console.log(error);
       throw new WsException((error as Error).message);
     }
   }
