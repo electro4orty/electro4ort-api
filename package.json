@@ -1,10 +1,11 @@
 {
-  "name": "hyper-chat-api",
+  "name": "electro4ort-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "API for electro4ort",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "author": "Electro4orty (https://github.com/electro4orty)",
+  "homepage": "https://api.electro4ort.pro",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "nest build",
