@@ -66,7 +66,7 @@ export class MessagesGateway {
       );
 
       filteredParticipants.forEach((user) => {
-        if (user.pushSubscription) {
+        if (user.pushSubscription && user.status === 'offline') {
           this.pushNotificationsService.send(
             user.pushSubscription as PushSubscription,
             {
