@@ -1,5 +1,5 @@
 export interface PushNotification {
   title: string;
-  message: string;
+  body: string;
   roomId: string;
 }

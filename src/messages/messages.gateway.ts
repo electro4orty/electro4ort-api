@@ -70,8 +70,8 @@ export class MessagesGateway {
           this.pushNotificationsService.send(
             user.pushSubscription as PushSubscription,
             {
-              message: newMessage.body,
-              title: 'New message',
+              body: newMessage.body,
+              title: newMessage.author.displayName,
               roomId: newMessage.roomId,
             },
           );
