@@ -29,7 +29,7 @@ export class UsersGateway {
       this.setOfflineFns[userId] = debounce(async (userId: string) => {
         await this.usersService.updateStatus(userId, 'offline');
         delete this.setOfflineFns[userId];
-      }, 60_000);
+      }, 5000);
     }
 
     this.setOfflineFns[userId](userId);
