@@ -1,7 +1,7 @@
 import { DrizzleService } from '@/db/drizzle.service';
 import { Message, messages, User, users } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, getTableColumns, lt, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, lt } from 'drizzle-orm';
 import { CreateMessageDTO } from './dto/create-message.dto';
 import { Attachment, attachments } from '@/db/schema/attachments';
 
@@ -15,15 +15,7 @@ export class MessagesService {
   ) {
     const where = and(
       eq(messages.roomId, roomId),
-      cursor
-        ? or(
-            lt(messages.createdAt, cursor.createdAt),
-            and(
-              eq(messages.createdAt, cursor.createdAt),
-              lt(messages.id, cursor.id),
-            ),
-          )
-        : undefined,
+      cursor ? lt(messages.createdAt, cursor.createdAt) : undefined,
     );
 
     const rows = await this.drizzleService.db
@@ -60,16 +52,15 @@ export class MessagesService {
             .select()
             .from(messages)
             .where(
-              or(
+              and(
+                eq(messages.roomId, roomId),
                 lt(messages.createdAt, data[data.length - 1].createdAt),
-                and(
-                  eq(messages.createdAt, data[data.length - 1].createdAt),
-                  lt(messages.id, data[data.length - 1].id),
-                ),
               ),
             )
             .limit(1)
         : null;
+
+    console.log('next', next);
 
     return {
       data,
