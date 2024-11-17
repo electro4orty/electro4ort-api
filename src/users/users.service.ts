@@ -48,6 +48,7 @@ export class UsersService {
         displayName: data.displayName,
         username: data.username,
         avatar: data.avatar || null,
+        birthDate: data.birthDate || null,
       })
       .where(eq(users.id, userId))
       .returning();

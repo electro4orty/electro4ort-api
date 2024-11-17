@@ -20,7 +20,9 @@ export const users = pgTable('users', {
   displayName: varchar('display_name').notNull(),
   avatar: varchar('avatar'),
   status: userStatus('status').notNull().default('offline'),
-  birthDate: timestamp('birth_date'),
+  birthDate: timestamp('birth_date', {
+    mode: 'string',
+  }),
   pushSubscription: jsonb('push_subscription'),
 });
 
