@@ -5,6 +5,7 @@ import { DrizzleService } from '@/db/drizzle.service';
 import { RoomsService } from '@/rooms/rooms.service';
 import { JwtService } from '@nestjs/jwt';
 import { NotFoundException } from '@nestjs/common';
+import { Hub, Room } from '@/db/schema';
 
 describe('HubsController', () => {
   let hubsController: HubsController;
@@ -38,10 +39,12 @@ describe('HubsController', () => {
         .mockImplementation(() => Promise.resolve(result));
 
       expect(
-        await hubsController.create('test-id', {
-          name: result.name,
-          avatar: 'http://image.com',
-        }),
+        await hubsController.create(
+          {
+            name: result.name,
+          },
+          'test-id',
+        ),
       ).toBe(result);
     });
   });
@@ -101,7 +104,7 @@ describe('HubsController', () => {
 
   describe('getRooms', () => {
     it('should find hub rooms', async () => {
-      const result: Awaited<ReturnType<HubsController['getRooms']>> = [
+      const rooms: Room[] = [
         {
           id: 'test-room-id',
           createdAt: new Date(),
@@ -111,13 +114,26 @@ describe('HubsController', () => {
           type: 'text',
         },
       ];
+      const hub: Hub = {
+        id: 'test-room-id',
+        createdAt: new Date(),
+        updatedAt: null,
+        authorId: 'test-author-id',
+        avatar: null,
+        name: 'test hub',
+        slug: 'test-hub',
+      };
+
       jest
         .spyOn(roomsService, 'findByHubId')
-        .mockImplementation(() => Promise.resolve(result));
+        .mockImplementation(() => Promise.resolve(rooms));
+      jest
+        .spyOn(hubsService, 'getOne')
+        .mockImplementation(() => Promise.resolve(hub));
 
       const response = await hubsController.getRooms('test-hub-id');
 
-      expect(response).toBe(result);
+      expect(response).toBe(rooms);
       expect(Array.isArray(response)).toBeTruthy();
     });
   });

@@ -4,10 +4,24 @@ import { UsersService } from '@/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { DrizzleService } from '@/db/drizzle.service';
 import { Test } from '@nestjs/testing';
+import { User } from '@/db/schema';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let authService: AuthService;
+
+  const mockUser: User = {
+    id: 'test-id',
+    createdAt: new Date(),
+    updatedAt: null,
+    displayName: 'John Doe',
+    password: '12345678',
+    username: 'john_doe',
+    avatar: null,
+    birthDate: null,
+    pushSubscription: null,
+    status: 'offline',
+  };
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -22,14 +36,7 @@ describe('AuthController', () => {
   describe('register', () => {
     it('should register user', async () => {
       const result: Awaited<ReturnType<AuthController['register']>> = {
-        user: {
-          id: 'test-id',
-          createdAt: new Date(),
-          updatedAt: null,
-          displayName: 'John Doe',
-          password: '12345678',
-          username: 'john_doe',
-        },
+        user: mockUser,
         token: 'test-token',
       };
       jest
@@ -49,14 +56,7 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should login user', async () => {
       const result: Awaited<ReturnType<AuthController['login']>> = {
-        user: {
-          id: 'test-id',
-          createdAt: new Date(),
-          updatedAt: null,
-          displayName: 'John Doe',
-          password: '12345678',
-          username: 'john_doe',
-        },
+        user: mockUser,
         token: 'test-token',
       };
       jest
@@ -75,14 +75,7 @@ describe('AuthController', () => {
   describe('getMe', () => {
     it('should get authorized user', async () => {
       const result: Awaited<ReturnType<AuthController['getMe']>> = {
-        user: {
-          id: 'test-id',
-          createdAt: new Date(),
-          updatedAt: null,
-          displayName: 'John Doe',
-          password: '12345678',
-          username: 'john_doe',
-        },
+        user: mockUser,
         token: 'test-token',
       };
       jest

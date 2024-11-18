@@ -4,6 +4,7 @@ import { RoomsService } from './rooms.service';
 import { DrizzleService } from '@/db/drizzle.service';
 import { HubsService } from '@/hubs/hubs.service';
 import { JwtService } from '@nestjs/jwt';
+import { MessagesService } from '@/messages/messages.service';
 
 describe('RoomsController', () => {
   let roomsController: RoomsController;
@@ -12,7 +13,13 @@ describe('RoomsController', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [RoomsController],
-      providers: [RoomsService, DrizzleService, HubsService, JwtService],
+      providers: [
+        RoomsService,
+        DrizzleService,
+        HubsService,
+        JwtService,
+        MessagesService,
+      ],
     }).compile();
 
     roomsService = moduleRef.get(RoomsService);
