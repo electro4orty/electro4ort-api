@@ -8,6 +8,7 @@ const envSchema = z.object({
   WEB_PUSH_PUBLIC_KEY: z.string(),
   WEB_PUSH_PRIVATE_KEY: z.string(),
   ADMIN_EMAIL: z.string(),
+  PORT: z.coerce.number(),
 });
 
 export type Env = z.infer<typeof envSchema>;
