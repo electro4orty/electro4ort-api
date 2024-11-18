@@ -7,6 +7,15 @@ on:
     branches: ['main']
   workflow_dispatch:
 
+env:
+  DB_URL: postgresql://postgres:root@127.0.0.1:5432/electro4ort
+  JWT_SECRET: asdlaowkpdw09[ujwd0WJadawj0d1wjd10wjidd]d
+  APP_URL: http://127.0.0.1:3000
+  WEB_PUSH_PUBLIC_KEY: gE2QpkPkEqlc42XO-2mUK9bwMmzAo9YTmefFxcAmwyfnmWsI48P93Rro9u6CK0b8UnAHoy1OXrg
+  WEB_PUSH_PRIVATE_KEY: ANtcYG0MVpeuTmasdvuyAPYq2Eq9sr_JM4
+  ADMIN_EMAIL: tester@mail.com
+  PORT: 3000
+
 jobs:
   test:
     runs-on: ubuntu-latest
