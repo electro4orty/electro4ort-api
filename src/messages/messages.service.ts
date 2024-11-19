@@ -73,7 +73,7 @@ export class MessagesService {
     };
   }
 
-  async create(data: CreateMessageDTO) {
+  async create(data: Omit<CreateMessageDTO, 'text'>) {
     const [message] = await this.drizzleService.db
       .insert(messages)
       .values({

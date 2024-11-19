@@ -38,7 +38,7 @@ export class MessagesGateway {
   @SubscribeMessage('message')
   async handleMessage(
     @MessageBody(new ZodValidationPipe(createMessageSchema))
-    data: CreateMessageDTO,
+    { text, ...data }: CreateMessageDTO,
     @ConnectedSocket() client: Socket,
   ) {
     try {
@@ -70,7 +70,7 @@ export class MessagesGateway {
           return this.pushNotificationsService.send(
             user.pushSubscription as PushSubscription,
             {
-              body: newMessage.body,
+              body: text,
               title: newMessage.author.displayName,
               roomId: newMessage.roomId,
             },
