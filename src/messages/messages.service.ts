@@ -60,8 +60,6 @@ export class MessagesService {
             .limit(1)
         : null;
 
-    console.log('next', next);
-
     return {
       data,
       nextCursor:
