@@ -1,9 +1,16 @@
 name: Deploy
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy on
+        type: environment
+        required: true
 
 jobs:
-  build:
+  build-production:
+    if: github.event.inputs.environment == 'production'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -17,7 +24,32 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             cd /var/www/api.electro4ort.pro
+            git fetch -ap
+            git checkout ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
             git pull
             pnpm i
             pnpm build
             pm2 restart "api.electro4ort.pro" --update-env
+  build-development:
+    if: github.event.inputs.environment == 'development'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            cd /var/www/dev-api.electro4ort.pro
+            git fetch -ap
+            git checkout ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+            git pull
+            pnpm i
+            pnpm build
+            pm2 restart "dev-api.electro4ort.pro" --update-env
