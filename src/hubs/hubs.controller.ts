@@ -8,17 +8,12 @@ import {
   Param,
   Post,
   Query,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { HubsService } from './hubs.service';
 import { ZodValidationPipe } from '@/zod-validation/zod-validation.pipe';
 import { CreateHubDTO, createHubSchema } from './dto/create-hub.dto';
 import { RoomsService } from '@/rooms/rooms.service';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { env } from '@/utils/env';
 
 @Controller('hubs')
 @UseGuards(AuthGuard)
@@ -35,27 +30,13 @@ export class HubsController {
   }
 
   @Post()
-  @UseInterceptors(
-    AnyFilesInterceptor({
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const fileName = `${Date.now()}_${file.originalname}`;
-          cb(null, fileName);
-        },
-      }),
-    }),
-  )
   async create(
-    @UploadedFiles() files: Express.Multer.File[],
     @Body(new ZodValidationPipe(createHubSchema)) body: CreateHubDTO,
     @UserId() userId: string,
   ) {
-    const avatar = files[0];
     const newHub = await this.hubsService.create(
       {
         name: body.name,
-        avatar: `${env.APP_URL}/uploads/${avatar.filename}`,
       },
       userId,
     );

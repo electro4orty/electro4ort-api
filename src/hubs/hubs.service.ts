@@ -31,14 +31,13 @@ export class HubsService {
     return hub;
   }
 
-  async create(data: CreateHubDTO & { avatar: string }, authorId: string) {
+  async create(data: CreateHubDTO, authorId: string) {
     const [newHub] = await this.drizzleService.db
       .insert(hubs)
       .values({
         name: data.name,
         authorId,
         slug: data.name.toLowerCase().replace(/ /g, '-'),
-        avatar: data.avatar,
       })
       .returning();
     await this.drizzleService.db.insert(hubParticipants).values({
