@@ -2,7 +2,7 @@ import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { rooms } from './rooms';
 
-export const messageType = pgEnum('message_type', ['text', 'gif']);
+export const messageType = pgEnum('message_type', ['text', 'gif', 'audio']);
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
