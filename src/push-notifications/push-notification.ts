@@ -1,5 +1,8 @@
 export interface PushNotification {
   title: string;
   body: string;
-  roomId: string;
+  data: {
+    roomId: string;
+    hubSlug: string;
+  };
 }

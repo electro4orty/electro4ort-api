@@ -72,7 +72,10 @@ export class MessagesGateway {
             {
               body: text,
               title: newMessage.author.displayName,
-              roomId: newMessage.roomId,
+              data: {
+                roomId: room.id,
+                hubSlug: hub.slug,
+              },
             },
           );
         }
