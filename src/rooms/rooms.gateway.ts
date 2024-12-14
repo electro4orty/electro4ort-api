@@ -13,7 +13,6 @@ import { Socket } from 'socket.io';
   cors: {
     origin: '*',
   },
-  namespace: 'rooms',
 })
 export class RoomsGateway {
   constructor(private readonly usersService: UsersService) {}
@@ -23,7 +22,7 @@ export class RoomsGateway {
     DebouncedFunc<(userId: string, roomId: string) => Promise<void>>
   > = {};
 
-  @SubscribeMessage('join')
+  @SubscribeMessage('roomJoin')
   async handleJoin(
     @MessageBody('roomId') roomId: string,
     @ConnectedSocket() client: Socket,
@@ -31,7 +30,7 @@ export class RoomsGateway {
     client.join(roomId);
   }
 
-  @SubscribeMessage('leave')
+  @SubscribeMessage('roomLeave')
   async handleLeave(
     @MessageBody('roomId') roomId: string,
     @ConnectedSocket() client: Socket,
