@@ -1,3 +1,4 @@
+import { storage } from '@/utils/storage';
 import {
   Controller,
   Get,
@@ -5,32 +6,60 @@ import {
   Post,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-import { diskStorage } from 'multer';
 import * as path from 'path';
 
 @Controller('attachments')
 export class AttachmentsController {
+  @Post()
+  @UseInterceptors(
+    FilesInterceptor('files', 99, {
+      limits: {
+        fieldSize: 1e6 * 50,
+        fileSize: 1e6 * 50,
+      },
+      storage,
+    }),
+  )
+  uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
+    return files.map((file) => ({
+      fileName: file.filename,
+      mimeType: file.mimetype,
+      size: file.size,
+    }));
+  }
+
   @Post('audio')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
-        fieldSize: 1e6 * 5,
-        fileSize: 1e6 * 5,
+        fieldSize: 1e6 * 50,
+        fileSize: 1e6 * 50,
       },
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const fileName = `${Date.now()}_${file.originalname}`;
-          cb(null, fileName);
-        },
-      }),
+      storage,
     }),
   )
   async uploadAudio(@UploadedFile() file: Express.Multer.File) {
+    return {
+      fileName: file.filename,
+    };
+  }
+
+  @Post('video')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fieldSize: 1e6 * 50,
+        fileSize: 1e6 * 50,
+      },
+      storage,
+    }),
+  )
+  async uploadVideo(@UploadedFile() file: Express.Multer.File) {
     return {
       fileName: file.filename,
     };
