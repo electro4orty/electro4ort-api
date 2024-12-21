@@ -60,10 +60,23 @@ export class RoomsController {
       roomId,
       cursor
         ? {
-            createdAt: new Date(cursor.createdAt),
+            createdAt: cursor.createdAt,
             id: cursor.id,
           }
         : undefined,
+    );
+    return messages;
+  }
+
+  @Get(':roomId/missed-messages')
+  async getMissedRoomMessages(
+    @Param('roomId') roomId: string,
+    @Query('cursor') cursorParam: string,
+  ) {
+    const cursor = JSON.parse(cursorParam) as { createdAt: string };
+    const messages = await this.messagesService.getMissedRoomMessages(
+      roomId,
+      cursor,
     );
     return messages;
   }

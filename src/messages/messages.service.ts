@@ -1,7 +1,7 @@
 import { DrizzleService } from '@/db/drizzle.service';
 import { Message, messages, User, users } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, getTableColumns, lt } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, gt, lt } from 'drizzle-orm';
 import { CreateMessageDTO } from './dto/create-message.dto';
 import { Attachment, attachments } from '@/db/schema/attachments';
 
@@ -11,7 +11,7 @@ export class MessagesService {
 
   async getRoomMessages(
     roomId: string,
-    cursor: { createdAt: Date; id: string } | undefined,
+    cursor: { createdAt: string; id: string } | undefined,
   ) {
     const where = and(
       eq(messages.roomId, roomId),
@@ -71,6 +71,48 @@ export class MessagesService {
           : null,
       hasNextPage: next && next.length !== 0,
     };
+  }
+
+  async getMissedRoomMessages(
+    roomId: string,
+    cursor: {
+      createdAt: string;
+    },
+  ) {
+    const where = and(
+      eq(messages.roomId, roomId),
+      gt(messages.createdAt, cursor.createdAt),
+    );
+
+    const rows = await this.drizzleService.db
+      .select({
+        ...getTableColumns(messages),
+        author: users,
+        attachment: attachments,
+      })
+      .from(messages)
+      .limit(20)
+      .where(where)
+      .orderBy(desc(messages.createdAt), desc(messages.id))
+      .leftJoin(users, eq(messages.authorId, users.id))
+      .leftJoin(attachments, eq(attachments.messageId, messages.id));
+
+    const data = rows.reduce<
+      (Message & { author: User | null; attachments: Attachment[] })[]
+    >((prev, message) => {
+      const existingMessage = prev.find((item) => item.id === message.id);
+      if (!existingMessage) {
+        prev.push({
+          ...message,
+          attachments: message.attachment ? [message.attachment] : [],
+        });
+      } else if (message.attachment) {
+        existingMessage.attachments.push(message.attachment);
+      }
+      return prev;
+    }, []);
+
+    return data;
   }
 
   async create(data: Omit<CreateMessageDTO, 'text'>) {

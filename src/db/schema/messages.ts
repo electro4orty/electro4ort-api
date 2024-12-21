@@ -11,8 +11,14 @@ export const messageType = pgEnum('message_type', [
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at'),
+  createdAt: timestamp('created_at', {
+    mode: 'string',
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', {
+    mode: 'string',
+  }),
   authorId: uuid('author_id').references(() => users.id, {
     onDelete: 'set null',
   }),
