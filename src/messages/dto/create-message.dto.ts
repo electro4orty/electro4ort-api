@@ -17,6 +17,7 @@ export const createMessageSchema = z.object({
     .max(99)
     .nullable(),
   type: z.enum(messageType.enumValues),
+  replyToId: z.string().nullable(),
 });
 
 export type CreateMessageDTO = z.infer<typeof createMessageSchema>;

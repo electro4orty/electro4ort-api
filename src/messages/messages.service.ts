@@ -1,7 +1,7 @@
 import { DrizzleService } from '@/db/drizzle.service';
 import { Message, messages, User, users } from '@/db/schema';
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, getTableColumns, gt, lt } from 'drizzle-orm';
+import { aliasedTable, and, desc, eq, gt, lt } from 'drizzle-orm';
 import { CreateMessageDTO } from './dto/create-message.dto';
 import { Attachment, attachments } from '@/db/schema/attachments';
 
@@ -18,30 +18,46 @@ export class MessagesService {
       cursor ? lt(messages.createdAt, cursor.createdAt) : undefined,
     );
 
-    const rows = await this.drizzleService.db
+    const reply = aliasedTable(messages, 'reply');
+    const rows: {
+      messages: Message;
+      users: User;
+      attachments: Attachment;
+      replies: Message;
+    }[] = await this.drizzleService.db
       .select({
-        ...getTableColumns(messages),
-        author: users,
-        attachment: attachments,
+        messages: messages,
+        users: users,
+        attachments: attachments,
+        replies: reply,
       })
       .from(messages)
       .limit(20)
       .where(where)
       .orderBy(desc(messages.createdAt), desc(messages.id))
       .leftJoin(users, eq(messages.authorId, users.id))
-      .leftJoin(attachments, eq(attachments.messageId, messages.id));
+      .leftJoin(attachments, eq(attachments.messageId, messages.id))
+      .leftJoin(reply, eq(reply.id, messages.replyToId));
 
     const data = rows.reduce<
-      (Message & { author: User | null; attachments: Attachment[] })[]
+      (Message & {
+        author: User | null;
+        attachments: Attachment[];
+        replyTo: Message | null;
+      })[]
     >((prev, message) => {
-      const existingMessage = prev.find((item) => item.id === message.id);
+      const existingMessage = prev.find(
+        (item) => item.id === message.messages.id,
+      );
       if (!existingMessage) {
         prev.push({
-          ...message,
-          attachments: message.attachment ? [message.attachment] : [],
+          ...message.messages,
+          attachments: message.attachments ? [message.attachments] : [],
+          replyTo: message.replies,
+          author: message.users,
         });
-      } else if (message.attachment) {
-        existingMessage.attachments.push(message.attachment);
+      } else if (message.attachments) {
+        existingMessage.attachments.push(message.attachments);
       }
       return prev;
     }, []);
@@ -84,30 +100,46 @@ export class MessagesService {
       gt(messages.createdAt, cursor.createdAt),
     );
 
-    const rows = await this.drizzleService.db
+    const reply = aliasedTable(messages, 'reply');
+    const rows: {
+      messages: Message;
+      users: User;
+      attachments: Attachment;
+      replies: Message;
+    }[] = await this.drizzleService.db
       .select({
-        ...getTableColumns(messages),
-        author: users,
-        attachment: attachments,
+        messages: messages,
+        users: users,
+        attachments: attachments,
+        replies: reply,
       })
       .from(messages)
       .limit(20)
       .where(where)
       .orderBy(desc(messages.createdAt), desc(messages.id))
       .leftJoin(users, eq(messages.authorId, users.id))
-      .leftJoin(attachments, eq(attachments.messageId, messages.id));
+      .leftJoin(attachments, eq(attachments.messageId, messages.id))
+      .leftJoin(reply, eq(reply.id, messages.replyToId));
 
     const data = rows.reduce<
-      (Message & { author: User | null; attachments: Attachment[] })[]
+      (Message & {
+        author: User | null;
+        attachments: Attachment[];
+        replyTo: Message | null;
+      })[]
     >((prev, message) => {
-      const existingMessage = prev.find((item) => item.id === message.id);
+      const existingMessage = prev.find(
+        (item) => item.id === message.messages.id,
+      );
       if (!existingMessage) {
         prev.push({
-          ...message,
-          attachments: message.attachment ? [message.attachment] : [],
+          ...message.messages,
+          attachments: message.attachments ? [message.attachments] : [],
+          replyTo: message.replies,
+          author: message.users,
         });
-      } else if (message.attachment) {
-        existingMessage.attachments.push(message.attachment);
+      } else if (message.attachments) {
+        existingMessage.attachments.push(message.attachments);
       }
       return prev;
     }, []);
@@ -123,6 +155,7 @@ export class MessagesService {
         roomId: data.roomId,
         authorId: data.userId,
         type: data.type,
+        replyToId: data.replyToId,
       })
       .returning();
     const [author] = await this.drizzleService.db
@@ -146,10 +179,19 @@ export class MessagesService {
             .returning()
         : [];
 
+    const replyTo = data.replyToId
+      ? await this.drizzleService.db
+          .select()
+          .from(messages)
+          .where(eq(messages.id, data.replyToId))
+          .limit(1)
+      : null;
+
     return {
       ...message,
       author,
       attachments: attachmentsData,
+      replyTo: replyTo ? replyTo[0] : null,
     };
   }
 }

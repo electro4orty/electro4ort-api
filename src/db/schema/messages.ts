@@ -1,4 +1,11 @@
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  AnyPgColumn,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { rooms } from './rooms';
 
@@ -29,6 +36,10 @@ export const messages = pgTable('messages', {
     .notNull(),
   body: text('body').notNull(),
   type: messageType('type').notNull().default('text'),
+  replyToId: uuid('reply_to_id').references((): AnyPgColumn => messages.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
 });
 
 export type Message = typeof messages.$inferSelect;
