@@ -194,4 +194,14 @@ export class MessagesService {
       replyTo: replyTo ? replyTo[0] : null,
     };
   }
+
+  async update(messageId: string, data: Partial<Message>) {
+    const [updatedMessage] = await this.drizzleService.db
+      .update(messages)
+      .set(data)
+      .where(eq(messages.id, messageId))
+      .returning();
+
+    return updatedMessage;
+  }
 }

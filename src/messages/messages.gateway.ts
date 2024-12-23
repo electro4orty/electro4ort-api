@@ -95,4 +95,35 @@ export class MessagesGateway {
       throw new WsException((error as Error).message);
     }
   }
+
+  @UseGuards(AuthGuard)
+  @SubscribeMessage('message/edit')
+  async handleMessageEdit(
+    @MessageBody('body') body: string,
+    @MessageBody('messageId') messageId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const updatedMessage = await this.messagesService.update(messageId, {
+        body,
+      });
+
+      const room = await this.roomsService.findById(updatedMessage.roomId);
+      if (!room) {
+        throw new WsException('Room not found');
+      }
+
+      const hub = await this.hubsService.findById(room.hubId);
+      if (!hub) {
+        throw new WsException('Hub not found');
+      }
+
+      client.broadcast.to(hub.slug).emit('message/edit', updatedMessage);
+
+      return updatedMessage;
+    } catch (error) {
+      console.log(error);
+      throw new WsException((error as Error).message);
+    }
+  }
 }
