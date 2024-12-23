@@ -198,7 +198,10 @@ export class MessagesService {
   async update(messageId: string, data: Partial<Message>) {
     const [updatedMessage] = await this.drizzleService.db
       .update(messages)
-      .set(data)
+      .set({
+        ...data,
+        updatedAt: new Date().toISOString(),
+      })
       .where(eq(messages.id, messageId))
       .returning();
 
